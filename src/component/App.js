@@ -80,7 +80,7 @@ class App extends Component {
               <TransformationList transformations={this.state.transformations} clearTransformationsHandler={this.handleClearTransformations} removeTransformationHandler={this.handleRemoveTransformation} />
               <AddTransformationForm handleAddTransformation={this.handleAddTransformation} />
             </Panel.Body>
-            <Panel.Footer><small>For example, to apply a 15% tax to the gross sale amount, add a transformation with the multipler set to 1.15.</small></Panel.Footer>
+            <Panel.Footer><small>For example, to apply a 15% tax to the gross sale amount, add a transformation with the multiplier set to 1.15.</small></Panel.Footer>
           </Panel>
           <Panel>
             <Panel.Heading>Output</Panel.Heading>
