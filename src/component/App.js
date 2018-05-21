@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import { ButtonToolbar } from 'react-bootstrap';
-import { Col } from 'react-bootstrap';
 import { Navbar } from 'react-bootstrap';
 import { Panel } from 'react-bootstrap';
 
-import AddTransformationButton from './AddTransformationButton';
-import ClearTransformationListButton from './ClearTransformationListButton';
+import AddTransformationForm from './AddTransformationForm';
 import GrossSaleInput from './GrossSaleInput';
 import GrossPriceDisplay from './GrossPriceDisplay';
 import TransformationList from './TransformationList';
@@ -30,8 +27,8 @@ class App extends Component {
     this.setGrossSalePrice(evt.target.value)
   }
 
-  handleAddTransformation() {
-    this.setTransformations(this.state.transformations.concat({ name: '', multiplier: 1.00 }))
+  handleAddTransformation(transformation) {
+    this.setTransformations(this.state.transformations.concat(transformation))
   }
 
   handleClearTransformations() {
@@ -40,22 +37,6 @@ class App extends Component {
 
   handleRemoveTransformation = (idx) => () => {
     this.setTransformations(this.state.transformations.filter((s, sidx) => idx !== sidx))
-  }
-
-  handleTransformationNameChange = (idx) => (evt) => {
-    const newTransformations = this.state.transformations.map((transformation, sidx) => {
-      if (idx !== sidx) return transformation
-      return { ...transformation, name: evt.target.value }
-    })
-    this.setTransformations(newTransformations)
-  }
-
-  handleTransformationMultiplierChange = (idx) => (evt) => {
-    const newTransformations = this.state.transformations.map((transformation, sidx) => {
-      if (idx !== sidx) return transformation
-      return { ...transformation, multiplier: evt.target.value }
-    })
-    this.setTransformations(newTransformations)
   }
 
   setGrossPurchasePrice(newValue) {
@@ -96,15 +77,10 @@ class App extends Component {
           <Panel>
             <Panel.Heading>Transformations</Panel.Heading>
             <Panel.Body>
-              <TransformationList transformations={this.state.transformations} changeGrossPriceHandler={this.handleChangeGrossPurchasePrice} removeTransformationHandler={this.handleRemoveTransformation} transformationNameChangeHandler={this.handleTransformationNameChange} tranformationMultiplierChangeHandler={this.handleTransformationMultiplierChange} />
-              <Col sm={12}>
-                <ButtonToolbar>
-                  <AddTransformationButton addTransformationHandler={this.handleAddTransformation} />
-                  <ClearTransformationListButton clearTransformationsHandler={this.handleClearTransformations} />
-                </ButtonToolbar>
-              </Col>
+              <TransformationList transformations={this.state.transformations} clearTransformationsHandler={this.handleClearTransformations} removeTransformationHandler={this.handleRemoveTransformation} />
+              <AddTransformationForm handleAddTransformation={this.handleAddTransformation} />
             </Panel.Body>
-            <Panel.Footer><small>For example, to apply a 15% tax to the gross sale amount, add a transformation with the value set to 1.15.</small></Panel.Footer>
+            <Panel.Footer><small>For example, to apply a 15% tax to the gross sale amount, add a transformation with the multipler set to 1.15.</small></Panel.Footer>
           </Panel>
           <Panel>
             <Panel.Heading>Output</Panel.Heading>
