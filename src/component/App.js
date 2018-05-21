@@ -16,47 +16,30 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      grossSales: localStorage.getItem('grossSales') || 0.00,
-      transformations: JSON.parse(localStorage.getItem('transformations')) || [],
-      grossPrice: localStorage.getItem('grossPrice') || 0.00
+      grossPurchasePrice: 0.00,
+      grossSalePrice: 0.00,
+      transformations: JSON.parse(localStorage.getItem('transformations')) || []
     }
 
-    this.handleChangeGrossSales = this.handleChangeGrossSales.bind(this)
+    this.handleChangeGrossSalePrice = this.handleChangeGrossSalePrice.bind(this)
     this.handleAddTransformation = this.handleAddTransformation.bind(this)
     this.handleClearTransformations = this.handleClearTransformations.bind(this)
   }
 
-  handleChangeGrossSales(evt) {
-    localStorage.setItem('grossSales', evt.target.value)
-    this.setState({grossSales: evt.target.value})
-
-    const newGrossPriceValue = this.newGrossPrice(this.state.transformations)
-    localStorage.setItem('grossPrice', newGrossPriceValue)
-    this.setState({ grossPrice: newGrossPriceValue })
+  handleChangeGrossSalePrice(evt) {
+    this.setGrossSalePrice(evt.target.value)
   }
 
   handleAddTransformation() {
-    this.setState({transformations: this.state.transformations.concat({ name: '', multiplier: 1.00 })})
+    this.setTransformations(this.state.transformations.concat({ name: '', multiplier: 1.00 }))
   }
 
   handleClearTransformations() {
-    localStorage.setItem('transformations', JSON.stringify([]))
-    this.setState({transformations: []})
-
-    const newGrossPriceValue = this.newGrossPrice(this.state.transformations)
-    localStorage.setItem('grossPrice', newGrossPriceValue)
-    this.setState({ grossPrice: newGrossPriceValue })
+    this.setTransformations([])
   }
 
   handleRemoveTransformation = (idx) => () => {
-    const newTransformations = this.state.transformations.filter((s, sidx) => idx !== sidx)
-    const newGrossPriceValue = this.newGrossPrice(newTransformations)
-    localStorage.setItem('grossPrice', newGrossPriceValue)
-    localStorage.setItem('transformations', JSON.stringify(newTransformations))
-    this.setState({
-      transformations: newTransformations,
-      grossPrice: newGrossPriceValue
-    })
+    this.setTransformations(this.state.transformations.filter((s, sidx) => idx !== sidx))
   }
 
   handleTransformationNameChange = (idx) => (evt) => {
@@ -64,9 +47,7 @@ class App extends Component {
       if (idx !== sidx) return transformation
       return { ...transformation, name: evt.target.value }
     })
-
-    localStorage.setItem('transformations', JSON.stringify(newTransformations))
-    this.setState({ transformations: newTransformations })
+    this.setTransformations(newTransformations)
   }
 
   handleTransformationMultiplierChange = (idx) => (evt) => {
@@ -74,22 +55,27 @@ class App extends Component {
       if (idx !== sidx) return transformation
       return { ...transformation, multiplier: evt.target.value }
     })
-    const newGrossPriceValue = this.newGrossPrice(newTransformations)
-
-    localStorage.setItem('transformations', JSON.stringify(newTransformations))
-    localStorage.setItem('grossPrice', newGrossPriceValue)
-    this.setState({
-      transformations: newTransformations,
-      grossPrice: newGrossPriceValue
-    })
+    this.setTransformations(newTransformations)
   }
 
-  newGrossPrice(transformations) {
-    var result = this.state.grossSales
-    transformations.forEach((transformation, idx) => {
-      result = result * transformation.multiplier
-    })
-    return result
+  setGrossPurchasePrice(newValue) {
+    this.setState({ grossPurchasePrice: newValue })
+  }
+
+  setGrossSalePrice(newValue) {
+    this.setState({ grossSalePrice: newValue }, this.updateGrossPurchasePrice)
+  }
+
+  setTransformations(newTransformations) {
+    localStorage.setItem('transformations', JSON.stringify(newTransformations))
+    this.setState({ transformations: newTransformations }, this.updateGrossPurchasePrice)
+  }
+
+  updateGrossPurchasePrice() {
+    const result = this.state.transformations.reduce((result, transformation) => {
+      return result * transformation.multiplier
+    }, parseFloat(this.state.grossSalePrice))
+    this.setGrossPurchasePrice(result || 0)
   }
 
   render() {
@@ -105,12 +91,12 @@ class App extends Component {
         <div>
           <Panel>
             <Panel.Heading>Input</Panel.Heading>
-            <Panel.Body><GrossSaleInput grossSales={this.state.grossSales} changeGrossSalesHandler={this.handleChangeGrossSales} /></Panel.Body>
+            <Panel.Body><GrossSaleInput grossSales={this.state.grossSalePrice} changeGrossSalesHandler={this.handleChangeGrossSalePrice} /></Panel.Body>
           </Panel>
           <Panel>
             <Panel.Heading>Transformations</Panel.Heading>
             <Panel.Body>
-              <TransformationList transformations={this.state.transformations} changeGrossPriceHandler={this.handleChangeGrossPrice} removeTransformationHandler={this.handleRemoveTransformation} transformationNameChangeHandler={this.handleTransformationNameChange} tranformationMultiplierChangeHandler={this.handleTransformationMultiplierChange} />
+              <TransformationList transformations={this.state.transformations} changeGrossPriceHandler={this.handleChangeGrossPurchasePrice} removeTransformationHandler={this.handleRemoveTransformation} transformationNameChangeHandler={this.handleTransformationNameChange} tranformationMultiplierChangeHandler={this.handleTransformationMultiplierChange} />
               <Col sm={12}>
                 <ButtonToolbar>
                   <AddTransformationButton addTransformationHandler={this.handleAddTransformation} />
@@ -123,7 +109,7 @@ class App extends Component {
           <Panel>
             <Panel.Heading>Output</Panel.Heading>
             <Panel.Body>
-              <GrossPriceDisplay grossPrice={this.state.grossPrice} />
+              <GrossPriceDisplay grossPrice={this.state.grossPurchasePrice} />
             </Panel.Body>
             <Panel.Footer><small>Gross price is an estimate only. Actual gross price of purchase may vary.</small></Panel.Footer>
           </Panel>
