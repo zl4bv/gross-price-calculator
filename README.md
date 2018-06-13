@@ -1,3 +1,7 @@
+# Gross Price Calculator
+
+[![Netlify site](https://www.netlify.com/img/global/badges/netlify-color-accent.svg)](https://lucid-raman-18d4d9.netlify.com/)
+
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
 Below you will find some information on how to perform common tasks.<br>
